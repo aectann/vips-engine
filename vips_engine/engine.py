@@ -16,7 +16,7 @@ class Engine(BaseEngine):
         return self.image.width, self.image.height
 
     def create_image(self, buffer):
-        if self.context.config.get(C_SCALE_ON_LOAD, True):
+        if self.get_mimetype(buffer) == 'image/jpeg' and self.context.config.get(C_SCALE_ON_LOAD, True):
             self._f = NamedTemporaryFile(bufsize=len(buffer), dir=self.context.config.get(C_TMP_DIR, None))
             self._f.write(buffer)
             # just read image width and height
@@ -37,6 +37,9 @@ class Engine(BaseEngine):
         self.image = self.image.resize(width/self.size[0])
 
     def read(self, extension, quality):
+        if extension == '.gif':
+            # VIPS doesn't support gif output, fall back to PNG
+            extension = '.png'
         if extension == '.jpg' or extension == '.webp':
             format_string = "{}[Q={}]".format(extension, int(quality))
         else:
