@@ -3,6 +3,8 @@ from tempfile import NamedTemporaryFile
 from thumbor.engines import BaseEngine
 from gi.repository import Vips
 
+C_NO_WEBP_OUTPUT = 'VIPS_ENGINE_NO_WEBP_OUTPUT'
+
 C_SCALE_ON_LOAD = 'VIPS_ENGINE_SCALE_ON_LOAD'
 
 C_TMP_DIR = 'VIPS_ENGINE_TMP_DIR'
@@ -40,6 +42,8 @@ class Engine(BaseEngine):
         if extension == '.gif':
             # VIPS doesn't support gif output, fall back to PNG
             extension = '.png'
+        if extension == '.webp' and self.context.config.get(C_NO_WEBP_OUTPUT, False):
+            extension = '.jpg'
         if extension == '.jpg' or extension == '.webp':
             format_string = "{}[Q={}]".format(extension, int(quality))
         else:
